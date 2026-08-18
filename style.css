@@ -1,0 +1,24 @@
+/* Styling the card container */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 350px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  font-family: system-ui, sans-serif;
+}
+
+/* Styling the button */
+button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+button:hover {
+  background-color: #4338ca;
+}
