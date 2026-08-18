@@ -28,6 +28,18 @@
     background:rgba(13,15,18,0.9);
     backdrop-filter:blur(6px);
     border-bottom:1px solid var(--border);
+    overflow:hidden;
+  }
+  nav::before{
+    content:"";
+    position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),#ff6b6b,#ffb020,#8a8f98,var(--accent));
+    background-size:300% 100%;
+    animation:slide 6s linear infinite;
+  }
+  @keyframes slide{
+    0%{background-position:0% 0%;}
+    100%{background-position:300% 0%;}
   }
   nav .logo{font-weight:700;letter-spacing:1px;color:var(--accent);}
   nav ul{list-style:none;display:flex;gap:28px;}
@@ -52,8 +64,25 @@
     margin-top:24px;max-width:420px;
     background:var(--card);border:1px solid var(--border);
     border-radius:10px;padding:14px 16px;
+    display:flex;align-items:center;gap:14px;
   }
-  .player audio{width:100%;height:34px;}
+  .player button{
+    width:38px;height:38px;flex-shrink:0;
+    border:none;border-radius:50%;
+    background:var(--accent);color:#0d0f12;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;
+  }
+  .player .track{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .player .bar{
+    position:relative;height:5px;border-radius:3px;
+    background:var(--border);cursor:pointer;overflow:hidden;
+  }
+  .player .bar-fill{
+    position:absolute;left:0;top:0;bottom:0;width:0%;
+    background:var(--accent);border-radius:3px;
+  }
+  .player .time{font-size:.75rem;color:var(--muted);display:flex;justify-content:space-between;}
 
   h2{font-size:1.8rem;margin-bottom:30px;border-left:4px solid var(--accent);padding-left:12px;}
 
@@ -67,6 +96,25 @@
   .card:hover{border-color:var(--accent);transform:translateY(-4px);}
   .card h3{margin-bottom:8px;color:var(--accent);}
   .card p{color:var(--muted);font-size:.9rem;}
+  a.card{display:block;text-decoration:none;}
+
+  .card.hover-embed{position:relative;overflow:hidden;min-height:220px;}
+  .card.hover-embed .overlay{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(13,15,18,.88);
+    opacity:0;visibility:hidden;
+    transition:opacity .25s ease;
+    padding:14px;
+  }
+  .card.hover-embed:hover .overlay{opacity:1;visibility:visible;}
+  .card.hover-embed .overlay iframe,
+  .card.hover-embed .overlay video{
+    width:100%;height:100%;border:0;border-radius:6px;opacity:.9;
+  }
+  .card.hover-embed .overlay p{
+    color:var(--text);font-size:.85rem;overflow-y:auto;max-height:100%;
+  }
 
   .socials{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;}
   .socials a{
@@ -141,42 +189,82 @@
   <p>Student, Roblox developer, and founder of T! Incorporated. I build games, edit stuff, and mess around with graphics.</p>
   <div class="tag">Amateur Editor · Graphic Maker · Developer</div>
   <div class="player">
-    <audio controls src="https://files.tiohmaxzing.dev/raw/vWrU4W.mp3"></audio>
+    <button id="playBtn">❚❚</button>
+    <div class="track">
+      <div class="bar" id="bar"><div class="bar-fill" id="barFill"></div></div>
+      <div class="time"><span id="curTime">0:00</span><span id="durTime">0:00</span></div>
+    </div>
+    <audio id="audioEl" src="https://files.tiohmaxzing.dev/raw/vWrU4W.mp3" autoplay preload="metadata"></audio>
   </div>
+      <p>Enjoy my current favorite track of the week lol.</p>
+      <p>Project Borealis OST | 9. Breach</p>
 </section>
+
+<script>
+  const audioEl = document.getElementById('audioEl');
+  const playBtn = document.getElementById('playBtn');
+  const bar = document.getElementById('bar');
+  const barFill = document.getElementById('barFill');
+  const curTime = document.getElementById('curTime');
+  const durTime = document.getElementById('durTime');
+
+  function fmt(t){
+    const m = Math.floor(t/60), s = Math.floor(t%60);
+    return m+':'+(s<10?'0':'')+s;
+  }
+
+  playBtn.addEventListener('click', () => {
+    if(audioEl.paused){ audioEl.play(); playBtn.textContent = '❚❚'; }
+    else{ audioEl.pause(); playBtn.textContent = '▶'; }
+  });
+
+  audioEl.addEventListener('loadedmetadata', () => {
+    durTime.textContent = fmt(audioEl.duration);
+  });
+
+  audioEl.addEventListener('timeupdate', () => {
+    const pct = (audioEl.currentTime / audioEl.duration) * 100 || 0;
+    barFill.style.width = pct + '%';
+    curTime.textContent = fmt(audioEl.currentTime);
+  });
+
+  bar.addEventListener('click', (e) => {
+    const rect = bar.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audioEl.currentTime = pct * audioEl.duration;
+  });
+
+  audioEl.addEventListener('ended', () => { playBtn.textContent = '▶'; });
+</script>
 
 <section class="about" id="about">
   <h2>About Me</h2>
   <p>I'm a student who spends a lot of free time developing on Roblox — currently building a facility-style game with real systems and scripting behind it. Outside of that I dabble in editing, motion graphics, and running my own small "company" T! Incorporated. Mixing Vietnamese and English is basically my default setting.</p>
 </section>
 
-
-<section class="liking" id="liking">
-  <h2>Things I like</h2>
-  <ul>
-    <li><span>Ivycomb</span> / I just love him and his musics LOL</li>
-    <li><span>Roblox</span> / Dunno I just enjoy playing some games on there, especially DoD nro I love Devesto</li>
-    <li><span>Minecraft</span> / Genuinely the best financial decision I've ever made</li>
-    <li><span>Risk of Rain 2</span> / I love Captain, hands down, now.</li>
-    <li><span>Limbus Company</span> / Well, dear PM fans, do I even need to explain further?</li>
-    <li><span>R6S</span> / I'm buns at this game btw don't invite me</li>
-  </ul>
-</section>
-
 <section id="work">
   <h2>Work / Projects</h2>
   <div class="grid">
-    <div class="card">
+    <div class="card hover-embed">
       <h3>Facility Game</h3>
-      <p>Roblox game with an industrial/facility aesthetic — custom systems and event-driven scripting (ESDS).</p>
+      <p>Roblox game with an industrial/facility aesthetic and custom systems and event-driven scripting. Sorry the roblox link just doesn't want to embed.</p>
+      <div class="overlay">
+        <iframe src="https://files.tiohmaxzing.dev/raw/grrrrraaaaaaaaaaa.gif" loading="lazy"></iframe>
+      </div>
     </div>
-    <div class="card">
+    <div class="card hover-embed">
       <h3>T! Incorporated</h3>
       <p>My personal dev/creative brand covering game dev, edits, and graphic work.</p>
+      <div class="overlay">
+        <p>Welcome to T! Incorporated! The place where all the weirdest intelligence of developers lies, maybe. Our group started as a passionate single developer group named Kia's Inc, but as I get encourage from my friends, T! Incorporated is now a thing, and the best thing? We welcome everyone, no matter who you are, where you from, we still welcomes you, friendly reminder, T! Incorporated could be your secondary family due to our policy on how we treat employees, shout out to Thomas. Have fun and enjoy your stay, any questions shall be referred to Thomas as he will try to answer them as soon as possible! Also don't ask for our game assets.</p>
+      </div>
     </div>
-    <div class="card">
+    <div class="card hover-embed">
       <h3>Edits & GFX</h3>
       <p>Video edits, motion graphics, and thumbnail/graphic design work using Blender & After Effects.</p>
+      <div class="overlay">
+        <video src="https://files.tiohmaxzing.dev/raw/AIre5B.mp4" autoplay muted loop playsinline></video>
+      </div>
     </div>
   </div>
 </section>
@@ -184,10 +272,10 @@
 <section id="skills">
   <h2>Skills</h2>
   <div class="grid">
-    <div class="card"><h3>Roblox Studio</h3><p>Lua scripting, systems design, game mechanics.</p></div>
-    <div class="card"><h3>Blender</h3><p>3D graphics and renders for GFX work.</p></div>
-    <div class="card"><h3>After Effects</h3><p>Video editing & motion design.</p></div>
-    <div class="card"><h3>Linux</h3><p>Comfortable running dev tools on EndeavourOS/Hyprland.</p></div>
+    <a class="card" href="https://en.wikipedia.org/wiki/Roblox_Studio" target="_blank"><h3>Roblox Studio</h3><p>Lua scripting, systems design, game mechanics.</p></a>
+    <a class="card" href="https://en.wikipedia.org/wiki/Blender_(software)" target="_blank"><h3>Blender</h3><p>3D graphics and renders for GFX work.</p></a>
+    <a class="card" href="https://en.wikipedia.org/wiki/Adobe_After_Effects" target="_blank"><h3>After Effects</h3><p>Video editing & motion design.</p></a>
+    <a class="card" href="https://en.wikipedia.org/wiki/Linux" target="_blank"><h3>Linux</h3><p>Comfortable running dev tools on EndeavourOS/Hyprland.</p></a>
   </div>
 </section>
 
